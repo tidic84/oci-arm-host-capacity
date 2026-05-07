@@ -20,10 +20,20 @@ jobs:
         run: composer install --no-dev --no-interaction
 
       - name: Write private key
+        env:
+          PRIVATE_KEY: ${{ secrets.OCI_PRIVATE_KEY }}
         run: |
           mkdir -p ~/.oci
-          echo "${{ secrets.OCI_PRIVATE_KEY }}" > ~/.oci/oci_api_key.pem
+          printf '%s\n' "$PRIVATE_KEY" > ~/.oci/oci_api_key.pem
           chmod 600 ~/.oci/oci_api_key.pem
+          echo "=== First line ==="
+          head -1 ~/.oci/oci_api_key.pem
+          echo "=== Last line ==="
+          tail -1 ~/.oci/oci_api_key.pem
+          echo "=== Line count ==="
+          wc -l ~/.oci/oci_api_key.pem
+          echo "=== Validation ==="
+          openssl pkey -in ~/.oci/oci_api_key.pem -noout && echo "KEY OK" || echo "KEY INVALID"
 
       - name: Run script
         env:
